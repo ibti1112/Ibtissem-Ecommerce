@@ -1,25 +1,42 @@
 <template>
-  <div class="col-md-6 offset-md-3 border rounded p-4 mt-2 shadow">
-    <h4 align="center">Modifier Article</h4>
-<form @submit.prevent="modifierproduit">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <div class="container-fluid">
+<button type="button" class="btn btn-warning roundedcircle"
+@click="visible = true">
+<span style="color: rgb(43, 27, 27)">
+<i class="fa-solid fa-square-plus"> </i>
+</span>
+New
+</button>
+</div>
+</nav>
+<form >
+<div class="card flex justify-content-center">
+<Dialog
+v-model:visible="visible"
+>
 <div class="row">
 <div class="col-md-6">.
 <label for="reference" class="form-label">Référence</label>
-<input type="text" class="form-control" id="reference" vmodel="article.reference">
+<input type="text" class="form-control" id="reference" vmodel="
+article.reference">
 </div>
 <div class="col-md-6 ms-auto">
 <label for="designation" class="form-label">Désignation</label>
-<input type="texte" class="form-control" id="designation" vmodel="article.designation">
+<input type="texte" class="form-control" id="designation" vmodel="
+article.designation">
 </div>
 </div>
 <div class="row">
 <div class="col-md-6">.
 <label for="marque" class="form-label">Marque</label>
-<input type="text" class="form-control" id="marque" vmodel="article.marque">
+<input type="text" class="form-control" id="marque" vmodel="
+article.marque">
 </div>
 <div class="col-md-6 ms-auto">
 <label for="Quantité" class="form-label">Qtock</label>
-<input type="texte" class="form-control" id="qtestock" vmodel="article.qtestock">
+<input type="texte" class="form-control" id="qtestock" vmodel="
+article.qtestock">
 </div>
 </div>
 <div class="row">
@@ -31,7 +48,7 @@
 <label for="scategorie" class="form-label">Sous Catégorie</label>
 <select class="form-control" v-model="article.scategorieID">
 <option v-for="sc in Scategories" :key="sc.id"
-:value=sc.id>{{sc.nomscategorie}}</option>
+:value=sc.id>{{sc.nomscategorie}} </option>
 </select>
 </div>
 </div>
@@ -44,91 +61,83 @@ label-idle="Drop files here..."
 allow-multiple="false"
 accepted-file-types="image/jpeg, image/png"
 v-bind:files="myFiles"
-v-on:init="handleFilePondInit"
 :server="serverOptions()"
 />
 </div>
 <br/>
-<button type="submit" className="btn btn-outline-primary">
+<button type="submit" className="btn btn-outline-primary" @click="addArticle">
 <i class="fa-solid fa-floppy-disk"></i>Enregister
 </button>
-<router-link to="/listart" class="btn btn-outline-danger mx-2">
-<i class="fa-solid fa-xmark"></i>Cancel
-</router-link>
-</form>
+<button type="button" className="btn btn-outline-primary"
+@click="cancel">
+<i class="fa-solid fa-floppy-disk"></i>cancel
+</button>
+</Dialog>
 </div>
+</form>
 </template>
 <script setup>
 import { ref,onMounted } from "vue"
-import { useRouter,useRoute } from 'vue-router';
+import api from '../config/api.js';
 import vueFilePond from 'vue-filepond';
 import 'filepond/dist/filepond.min.css';
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import Dialog from 'primevue/dialog';
+//import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 //import 'filepond-plugin-image-preview/dist/filepond-plugin-imagepreview.min.css';
 // Create FilePond component
-const FilePond = vueFilePond(FilePondPluginImagePreview);
+//const FilePond = vueFilePond(FilePondPluginImagePreview);
 const myFiles = ref([]);
-const router = useRouter() ;
-const route = useRoute();
-import axios from 'axios';
-const Scategories = ref([]);
-const article = ref({});
-const fetchArticle= async()=> {
-await
-axios.get(`http://localhost:8000/api/articles/${route.params.id}`).then((res)=> {
-article.value = res.data;
+import axios from "axios";
+const visible = ref(false);
+//const cancel=()=>{
+  visible.value=false
+//}//
+
+const article=ref({
+reference:"",
+designation:"",
+marque:"",
+qtestock:0,
+prix:0,
+imageart:"/img/img1",
+scategorieID:""
 })
-.catch((err) => {console.error(err)})
-}
+const Scategories = ref([]);
 const getscategories=()=>{
-axios.get('http://localhost:8000/api/scategories').then(res => {
+api.get('/api/scategories').then(res => {
 Scategories.value = res.data;
 }).catch(error => {
 console.log(error)
 });
 }
-const modifierproduit=()=>{
-axios.put(`http://localhost:8000/api/articles/${route.params.id}`,article
-.value)
-.then(() => {
-router.push('/articles')})
-.catch(error => {
-
-console.error("There was an error!", error);})
+const addArticle=async()=>{
+try {
+await api.post("/api/articles/",article.value)
+{ visible.value=false
+//window.location.reload()
+}
+} catch (error) {
+}
 }
 onMounted(() => {
 getscategories();
-fetchArticle()
 }
 );
-const handleFilePondInit = async() => {
-if (article.value.imageart) {
-myFiles.value = [
-{
-source: article.value.imageart,
-options: { type: 'local' }
+const handleFilePondInit = () => {
+console.log('FilePond has initialized');
 }
-]
-}
+const cancel=()=>{
+visible.value=false
 }
 const serverOptions = () => { console.log('server pond');
 return {
-load: (source, load, error, progress, abort, headers) => {
-var myRequest = new Request(source);
-fetch(myRequest).then(function(response) {
-response.blob().then(function(myBlob) {
-load(myBlob);
-});
-});
-},
 process: (fieldName, file, metadata, load, error, progress, abort) => {
 const data = new FormData();
 data.append('file', file);
-data.append('upload_preset', 'GLID5IIT');
-data.append('cloud_name', 'esps');
+data.append('upload_preset', 'ipst2024');
+data.append('cloud_name', 'dvv9kv7wr');
 data.append('public_id', file.name);
-axios.post('https://api.cloudinary.com/v1_1/esps/upload',data)
-
+axios.post('https://api.cloudinary.com/v1_1/dvv9kv7wr/upload',data)
 .then((response) => response.data)
 .then((data) => {
 console.log(data);

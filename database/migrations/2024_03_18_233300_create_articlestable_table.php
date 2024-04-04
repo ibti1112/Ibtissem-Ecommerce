@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('articles', function (Blueprint $table) {
+        Schema::create('articlestable', function (Blueprint $table) {
             $table->id();
             $table->string('designation');
             $table->string('marque');
@@ -26,7 +26,7 @@ return new class extends Migration
             ->onDelete('restrict')
             ->onUpdate('restrict');
             $table->timestamps();
-            });
+        });
     }
 
     /**
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('articlestable');
     }
 };

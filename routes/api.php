@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Route;
 //use App\Http\Controllers\CategorieController;
 use App\Http\Controllers\ScategorieController;
 use App\Http\Controllers\ArticleController;
-Route::resource('articles', ArticleController::class);
+use App\Http\Controllers\ArticletableController;
+use App\Http\Controllers\PaymentController;
+//Route::resource('articles', ArticleController::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -28,4 +30,12 @@ Route::get('/scat/{idcat}',
 
 Route::middleware('api')->group(function () {
     Route::resource('articles', ArticleController::class);
+    });
+Route::middleware('api')->group(function () {
+Route::resource('articletable', ArticletableController::class);
+});
+
+Route::middleware('api')->group(function($router) {
+    Route::post('/createpayment', [PaymentController::class,
+    'createPaymentIntent']);
     });
